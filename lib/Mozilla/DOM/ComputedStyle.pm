@@ -25,7 +25,7 @@ our @EXPORT = qw(Get_Computed_Style_Property
 	
 );
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 require XSLoader;
 XSLoader::load('Mozilla::DOM::ComputedStyle', $VERSION);

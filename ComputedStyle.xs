@@ -4,34 +4,37 @@
 
 #include "ppport.h"
 
-#include <mozilla/nsCOMPtr.h>
-#include <mozilla/nsIDOMWindow.h>
-#include <mozilla/dom/nsIDOMViewCSS.h>
-#include <mozilla/string/nsString.h>
-#include <mozilla/nsIDOMCSSStyleDeclaration.h>
+#include <nsCOMPtr.h>
+#include <nsIDOMWindow.h>
+#include <dom/nsIDOMViewCSS.h>
+#include <nsEmbedString.h>
+#include <nsIDOMCSSStyleDeclaration.h>
 
 static SV *wrap_unichar_string(const PRUnichar *uni_str) {
+	nsEmbedString utf8;
+	nsEmbedCString u8c;
 	const char * u8str;
-	NS_ConvertUTF16toUTF8 utf8(uni_str);
 
-	u8str = utf8.get();
+	utf8 = uni_str;
+	NS_UTF16ToCString(utf8, NS_CSTRING_ENCODING_UTF8, u8c);
+
+	u8str = u8c.get();
 	return newSVpv(u8str, 0);
 }
 
-
 MODULE = Mozilla::DOM::ComputedStyle		PACKAGE = Mozilla::DOM::ComputedStyle		
 
-SV *
+nsEmbedString
 Get_Computed_Style_Property(win, elem, pname)
 	SV *win;
 	SV *elem;
-	const char *pname;
+	nsEmbedCString pname;
 	INIT:
 		nsCOMPtr<nsIDOMCSSStyleDeclaration> comp_style;
 		nsIDOMWindow *window;
 		nsIDOMViewCSS *w = 0;
 		nsresult rv;
-		nsString nspn, ret;
+		nsEmbedString nspn, ret;
 		SV *res = 0;
 	CODE:
 		window = INT2PTR(nsIDOMWindow *, SvIV(SvRV(win)));
@@ -46,16 +49,12 @@ Get_Computed_Style_Property(win, elem, pname)
 		if (!comp_style)
 			goto done;
 
-		CopyUTF8toUTF16(pname, nspn);
+		NS_CStringToUTF16(pname, NS_CSTRING_ENCODING_UTF8, nspn);
 		rv = comp_style->GetPropertyValue(nspn, ret);
-		if (NS_FAILED(rv))
-			goto done;
-
-		res = wrap_unichar_string(ret.get());
 done:
-		if (!res)
+		if (!ret.get())
 			XSRETURN_UNDEF;
 
-		RETVAL = res;
+		RETVAL = ret;
 	OUTPUT:
 		RETVAL
