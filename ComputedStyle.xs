@@ -6,7 +6,7 @@
 
 #include <nsCOMPtr.h>
 #include <nsIDOMWindow.h>
-#include <dom/nsIDOMViewCSS.h>
+#include <nsIDOMViewCSS.h>
 #include <nsEmbedString.h>
 #include <nsIDOMCSSStyleDeclaration.h>
 
