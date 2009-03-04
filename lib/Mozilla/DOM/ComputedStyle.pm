@@ -21,11 +21,9 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our @EXPORT = qw(Get_Computed_Style_Property
-	
-);
+our @EXPORT = qw(Get_Computed_Style_Property Get_Full_Zoom Set_Full_Zoom);
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 require XSLoader;
 XSLoader::load('Mozilla::DOM::ComputedStyle', $VERSION);
@@ -51,12 +49,22 @@ Mozilla::DOM::ComputedStyle - Interface to Mozilla getComputedStyle function.
 This module makes possible to get computed style properties from Mozilla DOM.
 See documentation for C<window.getComputedStyle> JavaScript function.
 
+It also includes functions to get and to set full page zoom.
+
 =head1 EXPORT
 
 =head2 Get_Computed_Style_Property($window, $element, $property_name)
 
-This is the only function in this module. It returns property <$property_name>
-of DOM element C<$element> of C<$window>.
+This function returns property <$property_name> of DOM element C<$element> of
+C<$window>.
+
+=head2 Get_Full_Zoom($browser)
+
+Returns current full zoom value.
+
+=head2 Set_Full_Zoom($browser, $zoom)
+
+Sets full zoom value.
 
 =head1 SEE ALSO
 
@@ -73,6 +81,5 @@ Copyright (C) 2006 by Boris Sukholitko
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.8 or,
 at your option, any later version of Perl 5 you may have available.
-
 
 =cut

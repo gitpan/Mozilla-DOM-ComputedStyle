@@ -1,14 +1,19 @@
+#include <nsIInterfaceRequestorUtils.h>
+#include <nsCOMPtr.h>
+#include <nsIContentViewer.h>
+#include <nsIDOMWindow.h>
+#include <nsIDOMViewCSS.h>
+#include <nsIWebBrowser.h>
+#include <nsIDocShell.h>
+#include <nsIMarkupDocumentViewer.h>
+#include <nsEmbedString.h>
+#include <nsIDOMCSSStyleDeclaration.h>
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 
 #include "ppport.h"
-
-#include <nsCOMPtr.h>
-#include <nsIDOMWindow.h>
-#include <nsIDOMViewCSS.h>
-#include <nsEmbedString.h>
-#include <nsIDOMCSSStyleDeclaration.h>
 
 static SV *wrap_unichar_string(const PRUnichar *uni_str) {
 	nsEmbedString utf8;
@@ -20,6 +25,25 @@ static SV *wrap_unichar_string(const PRUnichar *uni_str) {
 
 	u8str = u8c.get();
 	return newSVpv(u8str, 0);
+}
+
+static nsIMarkupDocumentViewer *get_markup_viewer(SV *bro_sv) {
+	nsCOMPtr<nsIContentViewer> cviewer;
+	nsIWebBrowser *bro = INT2PTR(nsIWebBrowser *, SvIV(SvRV(bro_sv)));
+	nsCOMPtr<nsIDocShell> dsh = do_GetInterface(bro);
+	nsCOMPtr<nsIMarkupDocumentViewer> mdv;
+	if (!dsh)
+		return NULL;
+
+	dsh->GetContentViewer(getter_AddRefs(cviewer));
+	if (!cviewer)
+		return NULL;
+
+	mdv = do_QueryInterface(cviewer);
+	if (!mdv)
+		return NULL;
+
+	return mdv;
 }
 
 MODULE = Mozilla::DOM::ComputedStyle		PACKAGE = Mozilla::DOM::ComputedStyle		
@@ -58,3 +82,26 @@ done:
 		RETVAL = ret;
 	OUTPUT:
 		RETVAL
+
+float Get_Full_Zoom(SV *bro_sv)
+	INIT:
+		float ret;
+	        nsCOMPtr<nsIMarkupDocumentViewer> mdv;
+	CODE:
+		mdv = get_markup_viewer(bro_sv);
+		if (!mdv)
+			XSRETURN_UNDEF;
+
+		mdv->GetFullZoom(&ret);
+		RETVAL = ret;
+	OUTPUT:
+		RETVAL
+
+void Set_Full_Zoom(SV *bro_sv, float zoom)
+	INIT:
+	        nsCOMPtr<nsIMarkupDocumentViewer> mdv;
+	CODE:
+		mdv = get_markup_viewer(bro_sv);
+		if (mdv)
+			mdv->SetFullZoom(zoom);
+
