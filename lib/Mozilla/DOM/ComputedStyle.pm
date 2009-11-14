@@ -21,9 +21,10 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
-our @EXPORT = qw(Get_Computed_Style_Property Get_Full_Zoom Set_Full_Zoom);
+our @EXPORT = qw(Get_Computed_Style_Property Get_Full_Zoom Set_Full_Zoom
+			Set_Poll_Timeout Unset_Poll_Timeout);
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 require XSLoader;
 XSLoader::load('Mozilla::DOM::ComputedStyle', $VERSION);

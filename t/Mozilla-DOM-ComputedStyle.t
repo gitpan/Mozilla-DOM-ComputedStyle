@@ -1,7 +1,7 @@
 use strict;
 use warnings FATAL => 'all';
 
-use Test::More tests => 9;
+use Test::More tests => 11;
 use Mozilla::Mechanize;
 use URI::file;
 
@@ -27,5 +27,15 @@ Set_Full_Zoom($moz->{agent}->{embed}->get_nsIWebBrowser, 1.5);
 is(Get_Full_Zoom($moz->{agent}->{embed}->get_nsIWebBrowser), 1.5);
 is(Get_Computed_Style_Property($moz->get_window, $p, "border-left-width")
 	, '4.66667px');
+
+Set_Poll_Timeout();
+Set_Poll_Timeout();
+$moz->get('http://www.yahoo.com/');
+like($moz->title, qr/Yahoo/);
+Unset_Poll_Timeout();
+Unset_Poll_Timeout();
+
+$moz->get('http://www.google.com/');
+like($moz->title, qr/Google/);
 
 $moz->close();

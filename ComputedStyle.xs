@@ -1,3 +1,4 @@
+#include <glib-2.0/glib.h>
 #include <nsIInterfaceRequestorUtils.h>
 #include <nsCOMPtr.h>
 #include <nsIContentViewer.h>
@@ -14,6 +15,14 @@
 #include "XSUB.h"
 
 #include "ppport.h"
+
+static GPollFunc _poll_func;
+
+static gint my_poll_function(GPollFD *ufds, guint nfsd, gint timeout_) {
+	if (timeout_ < 0)
+		timeout_ = 500;
+	return _poll_func(ufds, nfsd, timeout_);
+}
 
 static SV *wrap_unichar_string(const PRUnichar *uni_str) {
 	nsEmbedString utf8;
@@ -104,4 +113,18 @@ void Set_Full_Zoom(SV *bro_sv, float zoom)
 		mdv = get_markup_viewer(bro_sv);
 		if (mdv)
 			mdv->SetFullZoom(zoom);
+
+void Set_Poll_Timeout()
+	CODE:
+		if (_poll_func)
+			return;
+		_poll_func = g_main_context_get_poll_func(NULL);
+		g_main_context_set_poll_func(NULL, my_poll_function);
+
+void Unset_Poll_Timeout()
+	CODE:
+		if (!_poll_func)
+			return;
+		g_main_context_set_poll_func(NULL, _poll_func);
+		_poll_func = NULL;
 
